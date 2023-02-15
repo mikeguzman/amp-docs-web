@@ -1,0 +1,158 @@
+:current-module: amp-chromecast
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:amp-chromecast-docs: https://developers.google.com/cast/docs/developers
+:amp-chromecast-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpChromecastSample.zip
+
+= Google Cast SDK
+
+The AmpChromecast plugin offers a quick way to integrate AmpPlayer with the {amp-chromecast-docs}[Google Cast SDK] for sender applications in iOS. This plugin will simplify the communication between the sender and the receiver applications by handling the sender methods.
+
+If you want to check out a full implementation please refer to our {amp-chromecast-sample-ios}[AMP Chromecast application sample].
+
+:framework-name: AmpChromecast
+:external-sdk-name: Google Cast SDK
+:external-sdk-podname: google-cast-sdk
+:latest-ios-version: 4.4.7
+:external-sdk-ios-url: https://developers.google.com/cast/docs/ios_sender#manual_setup 
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+You need a working implementation of the AmpPlayer before using this plugin. If you need the implementation guide for AmpPlayer please refer to {amp-player-docs}[our documentation].
+
+=== Import
+
+The first step is to import the AmpChromecast plugin. In most scenarios you will also need the AmpCore, GoogleCast and UIKit libraries.
+
+[source,swift]
+----
+import AmpCore
+import AmpChromecast
+import GoogleCast
+import UIKit
+----
+
+=== Creating a new instance
+
+In your `AppDelegate` slass, the receiver ID must be specified.
+[source,swift]
+----
+AmpChromecastManager.initializeContext(receiverId: kGCKDefaultMediaReceiverApplicationID, loggerDelegate: self)
+----
+NOTE: The default receiver ID for iOS applications is `kGCKMediaDefaultReceiverApplicationID` for version 4.0.0 or lower; and `kGCKDefaultMediaReceiverApplicationID` for version 4.0.2 or higher. For custom receivers, you need to replace these values with your custom receiver ID.
+
+Also in your `AppDelegate` class, you need to instantiate the Main Navigation controller, create the Cast Container and enable its media controls.
+[source,swift]
+----
+let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
+let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
+let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
+castContainerVC.miniMediaControlsItemEnabled = true
+window!.rootViewController = castContainerVC
+window!.makeKeyAndVisible()
+----
+
+Moving to your view controller class where casting will be managed, you need to initialize the plugin by specifying the player being used as well as the parent view controller.
+[source,swift]
+----
+let manager = AmpChromecastManager(ampPlayer: player!, parentViewController: self)
+----
+
+Next, you need to add the Chromecast button to your view, so make sure to add this code on your view controller viewDidLoad() function:
+
+[source,swift]
+----
+let castButton = GCKUICastButton(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: castButton)
+----
+
+=== Casting set up
+
+You will also need to send a new object with the media info of the active playback.
+
+[source,swift]
+----
+let mediaInformationBuilder = GCKMediaInformationBuilder.init(contentURL: URL(string: playbackUrl)!)
+        mediaInformationBuilder.streamType = GCKMediaStreamType
+        mediaInformationBuilder.contentType = contentTyoe
+----
+
+For starting the video cast to a Chromecast device, just add your own button and assign it the custom class `GCKUICastButton`, that way video cast will start the video cast flow automatically.
+
+You will also be able to listen to several events from the `AmpChromecastManager` by implementing `AmpChromecastObserver` and assigning it to the manager as an observer. The way to achieve this is by using the `ampChromecast.registerObserver(observer)` method.
+
+=== Captions set up
+
+To implement Closed Captions for a custom receiver with the AMP iOS SDK:
+
+First, set the captions type and source.
+
+**For embedded captions**, create a new track for the captions, using the GCKMediaTrack init, setting the contentIdentifier to an empty string and the contentType to “text/cea608”.
+[source,swift]
+----
+let captionsTrack = GCKMediaTrack.init(identifier: 1, contentIdentifier: "", contentType: "text/cea608", type: GCKMediaTrackType.text, textSubtype: GCKMediaTextTrackSubtype.captions, name: "English Captions", languageCode: "en", customData: nil)
+----
+
+**For VTT captions**, create a new track for the captions, using the GCKMediaTrack init, setting the contentIdentifier to the VTT captions file URL and the contentType to “text/vtt”
+[source,swift]
+----
+let captionsTrack = GCKMediaTrack.init(identifier: 1, contentIdentifier: "https://some-url/caption_en.vtt", contentType: "text/vtt", type: GCKMediaTrackType.text, textSubtype: GCKMediaTextTrackSubtype.captions, name: "English Captions", languageCode: "en", customData: nil)
+----
+
+Next, create an array of tracks that contains the previously created track.
+[source,swift]
+----
+let tracks = [captionsTrack]
+----
+
+Finally, create the mediaInfo file using the parameters shown, setting them as required by your implementation.
+[source,swift]
+----
+var mediaInfo = GCKMediaInformation(contentID: url, streamType: .buffered, contentType: "application/x-mpegURL", metadata: metadata, streamDuration: TimeInterval(100), mediaTracks:tracks, textTrackStyle:nil, customData: nil)
+----
+
+=== Listening to events
+
+This plugin will automatically hook the events from the Chromecast SDK, and send the proper {amp-player-events-docs}[AMPPlayer Events]. However, in case you want to handle yourself some of the events on Chromecast, we provide the means to do this by implementing the AmpChromecastObserver.
+[source,swift]
+----
+ampChromecast?.registerObserver(self)
+
+extension PlayerViewController : AmpChromecastObserver {
+    
+    func onChromecastPlaybackStateChanged(_ manager: AmpChromecastManager) {
+        print("onChromecastPlaybackStateChanged")
+    }
+    
+    func onChromecastError(_ manager: AmpChromecastManager, error: Error?) {
+        print("onChromecastError \(error)")
+    }
+    
+    func onSessionManager(_ manager: GCKSessionManager, didStart session: GCKSession) {
+        if let castContainerVC = UIApplication.shared.keyWindow?.rootViewController as? GCKUICastContainerViewController {
+          castContainerVC.miniMediaControlsItemEnabled = true
+        } else {
+          print("GCKUICastContainerViewController is not correctly configured")
+        }
+    }
+    
+    func onSessionManager(_ manager: GCKSessionManager, didEnd session: GCKSession, withError error: Error?) {
+        if let castContainerVC = UIApplication.shared.keyWindow?.rootViewController as? GCKUICastContainerViewController {
+          castContainerVC.miniMediaControlsItemEnabled = false
+        } else {
+          print("GCKUICastContainerViewController is not correctly configured")
+        }
+    }
+    
+    func onSessionManager(_ manager: GCKSessionManager, didFailToStart session: GCKSession, withError error: Error) {
+        if let castContainerVC = UIApplication.shared.keyWindow?.rootViewController as? GCKUICastContainerViewController {
+          castContainerVC.miniMediaControlsItemEnabled = false
+        } else {
+          print("GCKUICastContainerViewController is not correctly configured")
+        }
+    }
+----
+
+:date: 5/6/2020
+:last-revision: 5/6/2020
+include::ROOT:partial$amp-additional-info.adoc[]

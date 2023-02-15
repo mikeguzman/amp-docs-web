@@ -1,0 +1,6 @@
+name: amp-web
+title: AMP Web SDK
+version: 9.1.0
+start_page: ROOT:get-started.adoc
+nav:
+- modules/ROOT/nav.adoc

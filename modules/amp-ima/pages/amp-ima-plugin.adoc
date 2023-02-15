@@ -1,0 +1,89 @@
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:imagesdir: image-catalog
+:google-ima-docs: https://developers.google.com/interactive-media-ads
+:amp-ima-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpIMAClientSample.zip
+:amp-dai-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpIMADAISample.zip
+:amp-dai-sample-tvos: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpIMADAISampleTV.zip
+
+= Google IMA
+
+The AmpIMA plugin offers a quick way to integrate AmpPlayer with the {google-ima-docs}[Interactive Media Ads] by Google. This plugin will handle the interaction between the AmpPlayer with the plugin as well as the ads insertion or DAI stream playback.
+
+If you want to check out a full implementation please refer to our application samples: 
+
+* {amp-ima-sample-ios}[AMP IMA client side ads application sample].
+* {amp-dai-sample-ios}[AMP DAI Application Sample for iOS].
+* {amp-dai-sample-tvos}[AMP DAI Application Sample for tvOS].
+
+
+:framework-name: AmpIMA
+:external-sdk-name: Google IMA SDK
+:external-sdk-podname: GoogleAds-IMA-iOS-SDK
+:external-sdk-ios-url: https://developers.google.com/interactive-media-ads/docs/sdks/ios/download
+:external-sdk-tvos-url: https://developers.google.com/interactive-media-ads/docs/sdks/tvos-client-side/download
+:latest-ios-version: 3.11.4
+:latest-tvos-version: 4.2.2
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+include::ROOT:partial$amp-implementation-intro.adoc[]
+
+=== Import
+
+The first step is to import the AmpIMA plugin. In the most likely scenario you will need the AmpCore library, and you may need the Google IMA SDK in specific cases.
+
+[source,swift]
+----
+import AmpCore
+import AmpIMA
+import GoogleInteractiveMediaAds
+----
+
+=== Creating a new instance
+
+To use this plugin you should first initialize it. You need to specify the player being used as well as the view were the ads will be displayed.
+[source,swift]
+----
+let manager = AmpIMAManager(ampPlayer: player, videoView: player.playerView!)
+----
+WARNING: Do not create multiple instances of the AMPIMAManager. This could create unwanted behaviors since it wouldn't be following Google's recomendation against intancing more than one IMAAdsLoader.
+
+=== Requesting DAI streams
+
+To request a DAI live or VoD stream you won't need to call the `AmpPlayer.play(url:String)` method. Instead use thismethod for requesting the DAI streams:
+
+.Live Stream
+[source,swift]
+----
+manager.requestLiveStream(assetkey: "sN_IYUG8STe1ZzhIIE_ksA")
+----
+.VoD Stream
+[source,swift]
+----
+manager.requestVodStream(contentSourceID: "2528370", videoID: "tears-of-steel")
+----
+NOTE: You can also add a fallback URL on this methods so that if the stream couldn't be loaded the fallback will still be played.
+
+=== Requesting IMA ads
+
+To request IMA ads just send your Ad Tag provided by Google to this method.
+[source,swift]
+----
+manager.requestImaAds(adTagUrl: adsUrl)
+----
+This will request the ads and display them at the proper time.
+
+=== Listening to events
+
+This plugin will automatically hook the events from the IMA SDK, both client-side ads and DAI streams, and send the proper {amp-player-events-docs}[AMPPlayer Events]. However, in case you want to handle yourself some of the events on IMA, we provide the means to do this by passing a valid delegate to the manager.
+[source,swift]
+----
+manager.imaDelegate = self
+manager.daiDelegate = self
+----
+
+:date: 4/27/2020
+:last-revision: 4/27/2020
+include::ROOT:partial$amp-additional-info.adoc[]
+

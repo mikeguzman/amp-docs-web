@@ -1,0 +1,68 @@
+:current-module: amp-media-analytics
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:imagesdir: image-catalog
+:amp-media-analytics-docs: https://learn.akamai.com/en-us/products/media_delivery/media_analytics.html
+:amp-media-analytics-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpMediaAnalyticsSample.zip
+:amp-media-analytics-sample-tvos: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpMediaAnalyticsSampleTV.zip
+
+= Akamai Media Analytics
+
+The AmpMediaAnalytics plugin offers a quick way to integrate AmpPlayer with {amp-media-analytics-docs}[Akamai Media Analytics]. This plugin enables the reporting of the Media Analytics beacons througout each playback session.
+
+If you want to check out a full implementation please refer to our samples:
+
+* {amp-media-analytics-sample-ios}[AMP Media Analytics application sample for iOS].
+* {amp-media-analytics-sample-tvos}[AMP Media Analytics application sample for tvOS].
+
+:framework-name: AmpMediaAnalytics
+:external-sdk-name: Akamai Media Analytics
+:latest-ios-version: 3.23
+:external-sdk-ios-url: http://79423.analytics.edgesuite.net/csma/plugin/iOS/AVFoundation/Swift5.2/iOS_AV.zip
+:external-sdk-tvos-url: http://79423.analytics.edgesuite.net/csma/plugin/tvOS/AVFoundation/Swift5.2/tvOS_AV.zip
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+You need a working implementation of the AmpPlayer before using this plugin. If you need the implementation guide for AmpPlayer please refer to {amp-player-docs}[our documentation].
+
+=== Import
+
+The first step is to import the AmpCore and AmpMediaAnalytics plugins. 
+
+[source,swift]
+----
+import AmpCore
+import AmpMediaAnalytics
+----
+
+=== Creating a new instance
+
+To use this plugin you should first initialize it. You need to specify the player being used as well as the Akamai Media Analytics configuration beacon XML URL.
+[source,swift]
+----
+var ampMediaAnalyticsManager:AmpMediaAnalyticsManager!
+
+ampMediaAnalyticsManager = AmpMediaAnalyticsManager(  ampPlayer: ampPlayer, configurationUrl: analyticsUrl)
+----
+NOTE: The configuration beacon XML URL is provided by Akamai.
+
+=== Including Custom Dimensions
+
+You can also have customized data (dimensions) included in the events reported by AmpMediaAnalytics, you achieve this by defining a dictionary with the `dimension: value` pairs and passing it on when initializing the `AmpMediaAnalyticsManager`. This is a sample implementation:
+
+[source,swift]
+----
+let customDimensions = [
+    "title": "Your Title",
+    "category": "Your Category",
+    "playerId": "Player ID",
+    "device": "device",
+    "show": "Your Show"
+]
+
+ampMediaAnalyticsManager = AmpMediaAnalyticsManager(  ampPlayer: ampPlayer, configurationUrl: analyticsUrl, dimensions: customDimensions)
+----
+
+:date: 5/6/2020
+:last-revision: 5/6/2020
+include::ROOT:partial$amp-additional-info.adoc[]

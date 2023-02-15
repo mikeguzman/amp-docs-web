@@ -1,0 +1,79 @@
+:current-module: amp-comscore
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:imagesdir: image-catalog
+:amp-comscore-docs: https://github.com/comScore/ComScore-iOS-watchOS-tvOS
+:amp-comscore-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpComScoreSample.zip
+:amp-comscore-sample-tvos: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpComScoreSampleTV.zip
+:comscore-docs: https://github.com/comScore/ComScore-iOS-watchOS-tvOS#manual
+
+= ComScore Analytics
+
+The AmpComScore plugin offers a quick way to integrate AmpPlayer with {amp-comscore-docs}[ComScore SDK]. This plugin enables the reporting of data collected by ComScore in your application.
+
+If you want to check out a full implementation please refer to our samples:
+
+* {amp-comscore-sample-ios}[AMP ComScore application sample for iOS].
+* {amp-comscore-sample-tvos}[AMP ComScore application sample for tvOS].
+
+:framework-name: AmpComScore
+:external-sdk-name: ComScore Analytics
+:external-sdk-podname: ComScore
+:latest-ios-version: 6.3.1
+:external-sdk-ios-url: https://github.com/comScore/ComScore-iOS-watchOS-tvOS/tree/master/ComScore/dynamic/iOS/ComScore.framework
+:external-sdk-tvos-url: https://github.com/comScore/ComScore-iOS-watchOS-tvOS/tree/master/ComScore/dynamic/tvOS/ComScore.framework
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+You need a working implementation of the AmpPlayer before using this plugin. If you need the implementation guide for AmpPlayer please refer to {amp-player-docs}[our documentation].
+
+=== Import
+
+The first step is to import the AmpCore and ComScore plugins. In addition, if you wish to specify the content metadata, you will also need to import the ComScore plugin.
+
+[source,swift]
+----
+import AmpCoreTV
+import AmpComScoreTV
+import ComScore
+----
+
+=== Creating a new instance
+
+To use this plugin you should first initialize it. You need to specify the publisher ID and the player being used.
+[source,swift]
+----
+var ampComScore: AmpComScore!
+
+ampComScore = AmpComScore(publisherId: publisherId, ampPlayer: ampPlayer!)
+----
+NOTE: The publisher ID is provided by ComScore.
+
+=== Specifying content metadata
+
+To specify the content metadata, you need to create an instance of `SCORStreamingContentMetadata`, set the desired values and pass it on to the AmpComScore instance by using the `addMainContentAsset(builder: builder)` API:
+
+[source,swift]
+----
+let metadata = SCORStreamingContentMetadata(builderBlock: { (builder) in
+    builder?.setMediaType(SCORStreamingContentType.longFormOnDemand)
+    builder?.setUniqueId("13579")
+    builder?.setLength(1418000) // 23m58s in milliseconds
+    builder?.setDictionaryClassificationC3("AMPC3")
+    builder?.setDictionaryClassificationC4("AMPC4")
+    builder?.setDictionaryClassificationC6("AMPC5")
+    builder?.setStationTitle("AMPStation")
+    builder?.setPublisherName("AMPPublisher")
+    builder?.setProgramTitle("AMPTitle")
+    builder?.setGenreName("AMPGenre")
+    builder?.classify(asCompleteEpisode: true)
+})!
+
+ampComScore.addMainContentAsset(builder: metadata)
+----
+
+If you want a full specification of the `SCORStreamingContentMetadata` you can find it on the {comscore-docs}[ComScore manuals].
+
+:date: 5/6/2020
+:last-revision: 5/6/2020
+include::ROOT:partial$amp-additional-info.adoc[]

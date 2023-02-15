@@ -1,0 +1,68 @@
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:framework-name: AmpNielsen
+:imagesdir: image-catalog
+:third-party-docs: https://engineeringportal.nielsen.com/docs/iOS_SDK_API_Reference
+:amp-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpNielsenSample.zip
+:configure-metadata-url: https://engineeringportal.nielsen.com/docs/DCR_Video_iOS_SDK#Configure_metadata
+:sdk-init-url: https://engineeringportal.nielsen.com/docs/DCR_Video_iOS_SDK#SDK_Initialization
+
+
+= Nielsen
+
+The {framework-name} plugin offers a quick way to integrate AmpPlayer with the {third-party-docs}[Nielsen SDK]. This plugin will handle the interaction between the AmpPlayer with Nielsen as well as the measurements on the video playback.
+
+If you want to check out a full implementation please refer to our application samples: 
+
+* {amp-sample-ios}[AMP Nielsen Sample]
+
+:external-sdk-name: Nielsen SDK
+:external-sdk-podname: NielsenAppSDK
+:external-sdk-url: https://engineeringportal.nielsen.com/docs/Special:Downloads
+:latest-ios-version: 7.1.0
+:latest-tvos-version: 7.1.0
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+include::ROOT:partial$amp-implementation-intro.adoc[]
+
+=== Import
+
+The first step is to import the {framework-name} plugin. In the most likely scenario you will need the AmpCore library.
+
+[source,swift]
+[subs="attributes"]
+----
+import AmpCore
+import {framework-name}
+----
+
+=== Creating a new instance
+
+To use this plugin you should first initialize it. You need to specify the player being used as well as the view were the ads will be displayed.
+[source,swift]
+----
+let appInfo = """
+{"appid": "PXXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+"sfcode": "dcr",
+"appname": "AppName"}
+"""
+
+nielsen = AmpNielsenManager(player: player, appInfo: appInfo)
+----
+
+NOTE: The `appid` and `sfcode` are both provided by Nielsen check {sdk-init-url}[their docs] for more info on this.
+
+=== Adding metadata
+
+You'll also nee to add metadata to track correctly the current playback. You can check the {configure-metadata-url}[documents] on this to check every configuration option.
+
+[source,swift]
+----
+nielsen?.set(metaData: metaData)
+----
+
+:date: 45/28/2020
+:last-revision: 5/28/2020
+include::ROOT:partial$amp-additional-info.adoc[]
+

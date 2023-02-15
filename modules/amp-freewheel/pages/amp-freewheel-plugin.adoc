@@ -1,0 +1,59 @@
+include::ROOT:partial$amp-gobal-attributes.adoc[]
+:imagesdir: image-catalog
+:freewheel-docs: https://hub.freewheel.tv/display/techdocs
+:amp-sample-ios: https://mdtp-a.akamaihd.net/amp-ios-sdk/samples/AmpFreewheelSample.zip
+
+= Freewheel
+
+The AmpFreewheel plugin offers a quick way to integrate AmpPlayer with the {freewheel-docs}[Freewheel SDK]. This plugin will handle the interaction between the AmpPlayer with the plugin as well as the ads insertion.
+
+If you want to check out a full implementation please refer to our application samples: 
+
+* {amp-sample-ios}[AMP Freewheel Sample]
+
+:framework-name: AmpFreewheel
+:external-sdk-name: AdManager SDK
+:latest-ios-version: 6.29.0
+:latest-tvos-version: 6.29.0
+include::ROOT:partial$amp-instalation.adoc[]
+
+== Implementation
+
+include::ROOT:partial$amp-implementation-intro.adoc[]
+
+=== Import
+
+The first step is to import the {framework-name} plugin. In the most likely scenario you will need the AmpCore library.
+
+[source,swift]
+----
+import AmpCore
+import AmpFreewheel
+----
+
+=== Creating a new instance
+
+To use this plugin you should first initialize it. You need to specify the player being used as well as the `Network ID` for the ads. This should be provided by FreeWheel.
+[source,swift]
+----
+let freewheel = AmpFreewheel(ampPlayer: player, networkId: 42015)
+----
+NOTE: While initializing the plugin will set the `autoplay` to `false`. You could expect unwanted behaviours if set to `true`.
+
+=== Requesting Ads
+
+To request ads for your videos just use this method with all the information provided by Freewheel.
+
+
+[source,swift]
+----
+freewheel.requestAds(serverUrl: "http://demo.v.fwmrm.net", profile: "42015:ios_allinone_profile", siteSectionId: "ios_allinone_demo_site_section", videoAssetId: VideoAssetId(id: "ios_allinone_demo_video", duration: 500))
+----
+
+NOTE: You can also add the `config` block while calling this method where you'll have access to the `FWAdController` for an extra layer of configuration before the ads are requested.
+
+
+:date: 45/28/2020
+:last-revision: 5/28/2020
+include::ROOT:partial$amp-additional-info.adoc[]
+
